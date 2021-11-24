@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { MikroORM } from "@mikro-orm/core";
-import { COOKIE_NAME, __prod__ } from "./constants";
+import { COOKIE_NAME, usingStudio, __prod__ } from "./constants";
 import microConfig from "./mikro-orm.config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
@@ -23,12 +23,14 @@ const main = async () => {
 
   const app = express();
 
-  app.use(
-    cors({
-      origin: "http://localhost:3000",
-      credentials: true,
-    })
-  );
+  if(!usingStudio){ // This is to disalble cors when using apollo studio
+    app.use(
+      cors({
+        origin: "http://localhost:3000",
+        credentials: true,
+      })
+    );
+  }
 
   app.use(
     expressSession({
@@ -62,7 +64,7 @@ const main = async () => {
 
   await apolloServer.start();
 
-  apolloServer.applyMiddleware({ app, cors: false });
+  apolloServer.applyMiddleware({ app, cors: usingStudio });
 
   app.listen(4000, () => {
     console.log("server started on localhost:4000");
